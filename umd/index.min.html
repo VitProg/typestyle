@@ -1,10 +1,28 @@
 <!-- Test UMD with a script-tag.html -->
 <html>
 <body>
+    <div id="test">TEST</div>
     <script src="./typestyle.min.js"></script>
+    <style id="testStyle"></style>
     <script>
+        debugger
         console.log(typestyle);
-        typestyle.cssRaw('body {background:red}');
+        typestyle.events.on('updated', (...args) => {
+            console.log('updated', args);
+        });
+        typestyle.events.on('changeTarget', (...args) => {
+            console.log('changeTarget', args);
+        });
+        typestyle.events.on('forceRenderStyles', (...args) => {
+            console.log('forceRenderStyles', args);
+        });
+        typestyle.cssRaw('body {background:#bbb}');
+        const cls = typestyle.style({color: 'red', fontSize: '10px'});
+        document.getElementById('test').classList.add(cls);
+
+        setTimeout(() => {
+            typestyle.setStylesTarget(document.getElementById('testStyle'));
+        }, 1000);
     </script>
 </body>
 </html>

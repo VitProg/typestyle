@@ -16,25 +16,29 @@ const createFreeStyle = () => FreeStyle.create(
   true,
 );
 
+export type EventSetItem = { callback: (...data: any[]) => void, context?: Object | null, once?: boolean };
+export type Events = 'updated' | 'changeTarget' | 'render';
+
 /**
  * Maintains a single stylesheet and keeps it in sync with requested styles
  */
 export class TypeStyle {
-  private _autoGenerateTag: boolean;
-  private _freeStyle: FreeStyle.FreeStyle;
-  private _pending: number;
-  private _pendingRawChange: boolean;
-  private _raw: string;
-  private _tag?: StylesTarget;
+  protected _autoGenerateTag: boolean;
+  protected _freeStyle: FreeStyle.FreeStyle;
+  protected _pending: number;
+  protected _pendingRawChange: boolean;
+  protected _raw: string;
+  protected _tag?: StylesTarget;
 
   /**
    * We have a single stylesheet that we update as components register themselves
    */
-  private _lastFreeStyleChangeId: number;
+  protected _lastFreeStyleChangeId: number;
 
   constructor({ autoGenerateTag }: { autoGenerateTag: boolean }) {
     const freeStyle = createFreeStyle();
 
+    this._eventListeners = {};
     this._autoGenerateTag = autoGenerateTag;
     this._freeStyle = freeStyle;
     this._lastFreeStyleChangeId = freeStyle.changeId;
@@ -45,12 +49,17 @@ export class TypeStyle {
 
     // rebind prototype to TypeStyle.  It might be better to do a function() { return this.style.apply(this, arguments)}
     this.style = this.style.bind(this);
+    this.on = this.on.bind(this);
+    this.once = this.once.bind(this);
+    this.off = this.off.bind(this);
+    this.offAll = this.offAll.bind(this);
+    this.trigger = this.trigger.bind(this);
   }
 
   /**
    * Only calls cb all sync operations settle
    */
-  private _afterAllSync(cb: () => void): void {
+  protected _afterAllSync(cb: () => void): void {
     this._pending++;
     const pending = this._pending;
     raf(() => {
@@ -61,7 +70,7 @@ export class TypeStyle {
     });
   }
 
-  private _getTag(): StylesTarget | undefined {
+  protected _getTag(): StylesTarget | undefined {
     if (this._tag) {
       return this._tag;
     }
@@ -82,7 +91,7 @@ export class TypeStyle {
   }
 
   /** Checks if the style tag needs updating and if so queues up the change */
-  private _styleUpdated(): void {
+  protected _styleUpdated(): void {
     const changeId = this._freeStyle.changeId;
     const lastChangeId = this._lastFreeStyleChangeId;
 
@@ -94,6 +103,8 @@ export class TypeStyle {
     this._pendingRawChange = false;
 
     this._afterAllSync(() => this.forceRenderStyles());
+
+    this.trigger('updated');
   }
 
   /**
@@ -131,7 +142,9 @@ export class TypeStyle {
     if (!target) {
       return;
     }
-    target.textContent = this.getStyles();
+    const styles = this.getStyles();
+    target.textContent = styles;
+    this.trigger('render', styles);
   }
 
   /**
@@ -169,6 +182,9 @@ export class TypeStyle {
    */
   public reinit = (): void => {
     /** reinit freestyle */
+
+    this.offAll();
+
     const freeStyle = createFreeStyle();
     this._freeStyle = freeStyle;
     this._lastFreeStyleChangeId = freeStyle.changeId;
@@ -191,6 +207,7 @@ export class TypeStyle {
       this._tag.textContent = '';
     }
     this._tag = tag;
+    this.trigger('changeTarget', tag);
     /** This special time buffer immediately */
     this.forceRenderStyles();
   }
@@ -224,5 +241,117 @@ export class TypeStyle {
       }
     }
     return result;
+  }
+
+  protected _eventListeners: {[eventName: string]: Set<EventSetItem>} = {};
+
+  public on(eventName: Events | Events[], callback: (...data: any[]) => void): void;
+  public on(eventName: Events | Events[], callback: (...data: any[]) => void, context: Object | null): void;
+  public on(eventName: Events | Events[], callback: (...data: any[]) => void, context: Object | null = null): void {
+    if (Array.isArray(eventName)) {
+      for(const _eventName of eventName) {
+        this.on(_eventName, callback, context);
+      }
+      return;
+    }
+
+    const event: EventSetItem = {callback, context, once: false};
+
+    if (!(eventName in this._eventListeners)) {
+      this._eventListeners[eventName] = new Set<EventSetItem>();
+    }
+
+    if (!this._eventListeners[eventName].has(event)) {
+      this._eventListeners[eventName].add(event);
+    }
+  }
+
+  public once(eventName: Events | Events[], callback: (...data: any[]) => void): void;
+  public once(eventName: Events | Events[], callback: (...data: any[]) => void, context: Object | null): void;
+  public once(eventName: Events | Events[], callback: (...data: any[]) => void, context: Object | null = null): void {
+    if (Array.isArray(eventName)) {
+      for(const _eventName of eventName) {
+        this.once(_eventName, callback, context);
+      }
+      return;
+    }
+
+    const event: EventSetItem = {callback, context, once: true};
+
+    if (!(eventName in this._eventListeners)) {
+      this._eventListeners[eventName] = new Set<EventSetItem>();
+    }
+
+    if (!this._eventListeners[eventName].has(event)) {
+      this._eventListeners[eventName].add(event);
+    }
+  }
+
+  public off(eventName: Events | Events[]): boolean;
+  public off(eventName: Events | Events[], callback: (...data: any[]) => void, context: Object | null): boolean;
+  public off(eventName: Events | Events[], callback: any = null, context: Object | null = null): boolean {
+    if (Array.isArray(eventName)) {
+      let result = true;
+      for(const _eventName of eventName) {
+        result = result && this.off(_eventName, callback, context);
+      }
+      return result;
+    }
+
+    if (callback) {
+      const eventOnce: EventSetItem = {callback, context, once: true};
+      const event: EventSetItem = {callback, context, once: false};
+
+      let result = false;
+      if (eventName in this._eventListeners) {
+        if (this._eventListeners[eventName].has(eventOnce)) {
+          this._eventListeners[eventName].delete(eventOnce);
+          result = true;
+        }
+
+        if (this._eventListeners[eventName].has(event)) {
+          this._eventListeners[eventName].delete(event);
+          result = true;
+        }
+
+        return result;
+      }
+
+      return false;
+    } else {
+      if (eventName in this._eventListeners) {
+        delete this._eventListeners[eventName];
+        return true;
+      }
+      return false;
+    }
+  }
+
+  public offAll() {
+    for(const eventName of ['updated', 'changeTarget', 'render'] as Events[]) {
+      this.off(eventName);
+    }
+  }
+
+  public trigger(eventName: Events, ...eventData: any[]) {
+    if (Array.isArray(eventName)) {
+      for(const _eventName of eventName) {
+        this.trigger(_eventName, ...eventData);
+      }
+      return;
+    }
+
+    if (eventName in this._eventListeners) {
+      this._eventListeners[eventName].forEach((event) => {
+        if (event.context) {
+          event.callback.call(event.context, ...eventData);
+        } else {
+          event.callback(...eventData);
+        }
+        if (event.once) {
+          this._eventListeners[eventName].delete(event);
+        }
+      });
+    }
   }
 }

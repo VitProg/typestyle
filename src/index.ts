@@ -1,17 +1,6 @@
 
-import { TypeStyle } from './internal/typestyle';
-export { TypeStyle };
-
-/**
- * All the CSS types in the 'types' namespace
- */
-import * as types from './types';
-export { types };
-
-/**
- * Export certain utilities
- */
-export { extend, classes, media } from './internal/utilities';
+import {TypeStyle, classes, createTypeStyle, extend, media, types} from './index-base';
+export {TypeStyle, classes, createTypeStyle, extend, media, types};
 
 /** Zero configuration, default instance of TypeStyle */
 const ts = new TypeStyle({ autoGenerateTag: true });
@@ -71,18 +60,11 @@ export const style = ts.style;
  */
 export const stylesheet = ts.stylesheet;
 
-/**
- * Creates a new instance of TypeStyle separate from the default instance.
- *
- * - Use this for creating a different typestyle instance for a shadow dom component.
- * - Use this if you don't want an auto tag generated and you just want to collect the CSS.
- *
- * NOTE: styles aren't shared between different instances.
- */
-export function createTypeStyle(target?: { textContent: string | null }): TypeStyle {
-  const instance = new TypeStyle({ autoGenerateTag: false });
-  if (target) {
-    instance.setStylesTarget(target);
-  }
-  return instance;
-}
+export const events = {
+    on: ts.on,
+    once: ts.once,
+    off: ts.off,
+    trigger: ts.trigger,
+};
+
+export const instance = ts;
