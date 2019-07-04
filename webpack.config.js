@@ -10,7 +10,7 @@ module.exports = [
       'typestyle': './lib/index.js',
     },
     output: {
-      filename: './umd/typestyle.js',
+      filename: '../umd/typestyle.js',
       libraryTarget: 'umd',
       library: 'typestyle',
     },
@@ -35,7 +35,7 @@ module.exports = [
       'typestyle.min': './lib/index.js',
     },
     output: {
-      filename: './umd/typestyle.min.js',
+      filename: '../umd/typestyle.min.js',
       libraryTarget: 'umd',
       library: 'typestyle',
     },
