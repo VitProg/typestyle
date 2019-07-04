@@ -1,4 +1,10 @@
-# TypeStyle
+# Forked TypeStyle
+
+Mainly for own projects.
+
+See original project: https://www.npmjs.com/package/typestyle
+
+___
 
 [![Join the chat at  gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/typestyle/general)
 
