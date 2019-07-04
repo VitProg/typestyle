@@ -68,3 +68,5 @@ export const events = {
 };
 
 export const instance = ts;
+
+export * from './csstips';
