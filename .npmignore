@@ -14,3 +14,6 @@ book.json
 
 # npm 
 npm-debug.log*
+
+.vscode
+.idea

@@ -7,6 +7,10 @@
   "types": "./lib/index",
   "module": "./lib.es2015/index.js",
   "jsnext:main": "./lib.es2015/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VitProg/typestyle.git"
+  },
   "scripts": {
     "build": "tsc -p . && tsc -p tsconfig.es2015.json && webpack",
     "unittest": "mocha ./lib/tests/**/*.js",
