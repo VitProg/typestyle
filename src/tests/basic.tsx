@@ -154,7 +154,7 @@ describe("initial test", () => {
       success: 'success_fmubem1'
     });
     assert.equal(getStyles(), '.warning_f1jvcvsh{color:red}.success_fmubem1{color:green}');
-  })
+  });
 
   it("style should ignore 'false' 'null' and 'undefined'", () => {
     reinit();
@@ -166,6 +166,15 @@ describe("initial test", () => {
       { backgroundColor: 'red' }
     );
     assert.equal(getStyles(), '.fb25ljk{background-color:red;color:blue}');
+  });
+
+  it("style should not append px to numeric properties", () => {
+    reinit();
+    style({
+      strokeWidth: 4,
+      strokeMiterlimit: 10,
+    });
+    assert.equal(getStyles(), '.f1xs2ny7{stroke-miterlimit:10;stroke-width:4}');
   });
 
   it("should generate unique instances when typestyle() is called", () => {
