@@ -1,3 +1,8 @@
+# 2.2.0
+* new build script (webpack)
+* join transform property into a string if it is an array. For example: ```{transform: ['scale(2)', 'rotate(25deg)']}``` convert to ```{transform: 'scale(2)rotate(25deg)'}``` 
+
+
 # 2.0.2
 `typestyle.classes` now takes objects. e.g. `assert.equal(classes("a", false && "b", "c", { d: false, e: true }, { f: {}, g: null }), "a c e f");`. Ref : https://github.com/typestyle/typestyle/pull/332
 

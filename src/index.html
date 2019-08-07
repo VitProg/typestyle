@@ -2,11 +2,14 @@
 <html>
 <body>
     <div id="test">TEST</div>
-    <script src="./typestyle.min.js"></script>
+    <script src="./typestyle.js"></script>
     <style id="testStyle"></style>
     <script>
-        debugger
+        /** @property typestyle **/
         console.log(typestyle);
+
+        typestyle.cssRaw('body {background:silver}');
+
         typestyle.events.on('updated', (...args) => {
             console.log('updated', args);
         });
@@ -19,6 +22,26 @@
         typestyle.cssRaw('body {background:#bbb}');
         const cls = typestyle.style({color: 'red', fontSize: '10px'});
         document.getElementById('test').classList.add(cls);
+
+        const className = typestyle.style({
+            fontSize: '30px',
+            position: 'absolute',
+            transform: [
+                'scale(1.5)',
+                'rotate(20deg)'
+            ],
+        });
+
+        const animationName = typestyle.keyframes({
+            from: { opacity: 0, transform: ['rotate(10deg)'] },
+            to: { opacity: 1, transform: ['scale(2)', 'translateX(10%)'] }
+        });
+
+        document.getElementById('test').classList.add(className);
+
+        setTimeout(() => {
+            console.log(typestyle.instance._tag.innerText);
+        });
 
         setTimeout(() => {
             typestyle.setStylesTarget(document.getElementById('testStyle'));

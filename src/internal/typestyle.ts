@@ -3,6 +3,8 @@ import * as types from '../types';
 
 import { ensureStringObj, explodeKeyframes } from './formatting';
 import { extend, raf } from './utilities';
+import {Styles} from "free-style";
+import {CSSProperties} from "../types";
 
 export type StylesTarget = { textContent: string | null };
 
@@ -56,6 +58,10 @@ export class TypeStyle {
     this.off = this.off.bind(this);
     this.offAll = this.offAll.bind(this);
     this.trigger = this.trigger.bind(this);
+  }
+
+  get freeStyle(): FreeStyle.FreeStyle {
+    return this._freeStyle;
   }
 
   /**
@@ -122,7 +128,7 @@ export class TypeStyle {
     this._raw += mustBeValidCSS || '';
     this._pendingRawChange = true;
     this._styleUpdated();
-  }
+  };
 
   /**
    * Takes CSSProperties and registers it to a global selector (body, html, etc.)
@@ -132,7 +138,7 @@ export class TypeStyle {
     this._freeStyle.registerRule(selector, object);
     this._styleUpdated();
     return;
-  }
+  };
 
   /**
    * Renders styles to the singleton tag imediately
@@ -147,7 +153,7 @@ export class TypeStyle {
     const styles = this.getStyles();
     target.textContent = styles;
     this.trigger('render', styles);
-  }
+  };
 
   /**
    * Utility function to register an @font-face
@@ -159,25 +165,31 @@ export class TypeStyle {
     }
     this._styleUpdated();
     return;
-  }
+  };
 
   /**
    * Allows use to use the stylesheet in a node.js environment
    */
   public getStyles = () => {
     return (this._raw || '') + this._freeStyle.getStyles();
-  }
+  };
 
   /**
    * Takes keyframes and returns a generated animationName
    */
   public keyframes = (frames: types.KeyFrames): string => {
     const { keyframes, $debugName } = explodeKeyframes(frames);
+    for (const key of Object.keys(keyframes)) {
+      const val = keyframes[key];
+      if (val && typeof val !== 'string') {
+        keyframes[key] = this.optimize(val);
+      }
+    }
     // TODO: replace $debugName with display name
     const animationName = this._freeStyle.registerKeyframes(keyframes as FreeStyle.Styles, $debugName);
     this._styleUpdated();
     return animationName;
-  }
+  };
 
   /**
    * Helps with testing. Reinitializes FreeStyle + raw
@@ -200,7 +212,7 @@ export class TypeStyle {
     if (target) {
       target.textContent = '';
     }
-  }
+  };
 
   /** Sets the target tag where we write the css on style updates */
   public setStylesTarget = (tag: StylesTarget): void => {
@@ -212,6 +224,27 @@ export class TypeStyle {
     this.trigger('changeTarget', tag);
     /** This special time buffer immediately */
     this.forceRenderStyles();
+  };
+
+  // noinspection JSMethodCanBeStatic
+  public optimize<S extends Styles | CSSProperties>(styles: S): S {
+    const result = {};
+
+    for (const name of Object.keys(styles)) {
+      let value = (styles as any)[name];
+      switch (name) {
+        case 'transform': {
+          if (Array.isArray(value)) {
+            value = value.join('');
+          }
+          break;
+        }
+      }
+
+      (result as any)[name] = value;
+    }
+
+    return result as S;
   }
 
   /**
@@ -222,7 +255,10 @@ export class TypeStyle {
   public style() {
     const freeStyle = this._freeStyle;
     const { result, debugName } = ensureStringObj(extend.apply(undefined, arguments));
-    const className = debugName ? freeStyle.registerStyle(result, debugName) : freeStyle.registerStyle(result);
+    const optimized = this.optimize(result as Styles);
+    const className = debugName ?
+      freeStyle.registerStyle(optimized, debugName) :
+      freeStyle.registerStyle(optimized);
     this._styleUpdated();
     return className;
   }
@@ -236,14 +272,14 @@ export class TypeStyle {
     const classNames = Object.getOwnPropertyNames(classes) as (Names)[];
     const result = {} as types.CSSClassNames<Names>;
     for (let className of classNames) {
-      const classDef = classes[className] as types.NestedCSSProperties
+      const classDef = classes[className] as types.NestedCSSProperties;
       if (classDef) {
-        classDef.$debugName = className
+        classDef.$debugName = className;
         result[className] = this.style(classDef);
       }
     }
     return result;
-  }
+  };
 
   protected _eventListeners: {[eventName: string]: Set<EventSetItem>} = {};
 
@@ -357,3 +393,4 @@ export class TypeStyle {
     }
   }
 }
+

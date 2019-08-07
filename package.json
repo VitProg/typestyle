@@ -2,25 +2,28 @@
   "name": "typestyle-vp",
   "version": "2.1.0",
   "description": "TypeSafe CSS",
-  "main": "./lib/index.js",
-  "typings": "./lib/index",
-  "types": "./lib/index",
-  "module": "./lib.es2015/index.js",
-  "jsnext:main": "./lib.es2015/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/VitProg/typestyle.git"
   },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc -p . && tsc -p tsconfig.es2015.json && webpack",
-    "unittest": "mocha ./lib/tests/**/*.js",
-    "test": "npm run build && npm run unittest",
-    "preversion": "npm run test",
-    "postversion": "git push --follow-tags && npm publish",
-    "start": "npm run build -- -w & npm run unittest -- --watch"
+    "copy-index": "cp ./src/index.html ./test/index.html",
+    "watch": "webpack --watch",
+    "build": "webpack",
+    "build-prod": "webpack --production",
+    "compile": "tsc -p tsconfig.es2015.json",
+    "test": "npm run compile && mocha ./test/tests/**/*.js",
+    "preversion": "npm run test && npm run build-test",
+    "postversion": "git push --follow-tags && npm publish"
   },
   "keywords": [],
-  "author": "",
+  "author": "VitProg",
   "license": "MIT",
   "dependencies": {
     "csstype": "^2.6.5",
@@ -29,16 +32,21 @@
   "devDependencies": {
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.0.12",
+    "copy-webpack-plugin": "^5.0.4",
     "mocha": "^6.1.4",
+    "source-map-loader": "^0.2.4",
+    "terser-webpack-plugin": "^1.4.1",
+    "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.2",
+    "uglifyjs-webpack-plugin": "^2.1.3",
     "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.5",
-    "uglifyjs-webpack-plugin": "^2.1.3"
+    "webpack-cli": "^3.3.5"
   },
   "greenkeeper": {
     "ignore": [
-      "webpack"
+      "webpack",
+      "webpack-cli"
     ]
   }
 }

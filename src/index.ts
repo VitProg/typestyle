@@ -1,6 +1,7 @@
-
 import {TypeStyle, classes, createTypeStyle, extend, media, types} from './index-base';
 export {TypeStyle, classes, createTypeStyle, extend, media, types};
+
+export * from "./types";
 
 /** Zero configuration, default instance of TypeStyle */
 const ts = new TypeStyle({ autoGenerateTag: true });

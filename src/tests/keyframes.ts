@@ -1,4 +1,4 @@
-import { reinit, keyframes } from '../index';
+import {reinit, keyframes, getStyles} from '../index';
 import * as assert from 'assert';
 
 describe("keyframes", () => {
@@ -26,6 +26,18 @@ describe("keyframes", () => {
     process.env.NODE_ENV = NODE_ENV;
 
     assert.equal(animationName, 'f1gwuh0p');
+  });
+
+  it('should array in transform css property', () => {
+    reinit();
+    const animationName = keyframes({
+      from: { opacity: 0, transform: ['rotate(10deg)'] },
+      to: { opacity: 1, transform: ['scale(2)', 'translateX(10%)'] }
+    });
+
+    assert.equal(getStyles(), '@keyframes f2fxcjq{from{opacity:0;transform:rotate(10deg)}to{opacity:1;transform:scale(2)translateX(10%)}}');
+
+    assert.equal(animationName, 'f2fxcjq');
   });
 
   it('supports generated animation name', () => {
