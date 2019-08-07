@@ -194,4 +194,36 @@ describe("initial test", () => {
 
     assert.equal(ts.getStyles(), 'body{font-size:12px}');
   });
-})
+
+  it("should create TypeStyle instance with debugName = true and false or from process.env.NODE_ENV", () => {
+    const css = {$debugName: 'test', fontSize: 14};
+
+    const ts1 = createTypeStyle(undefined, false, true);
+    const cl1 = ts1.style(css);
+
+    const ts2 = createTypeStyle(undefined, false, false);
+    const cl2 = ts2.style(css);
+
+    assert.equal(cl1, 'test_fc4zu15');
+    assert.equal(cl2, 'fc4zu15');
+
+    ts1.reinit(true);
+    assert.equal(ts1.style(css), 'test_fc4zu15');
+
+    ts1.reinit(false);
+    assert.equal(ts1.style(css), 'fc4zu15');
+
+    ts1.reinit();
+    assert.equal(ts1.style(css), 'test_fc4zu15');
+
+    const NODE_ENV = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    ts1.reinit();
+    assert.equal(ts1.style(css), 'fc4zu15');
+    process.env.NODE_ENV = NODE_ENV;
+
+    ts1.reinit();
+    assert.equal(ts1.style(css), 'test_fc4zu15');
+
+  });
+});

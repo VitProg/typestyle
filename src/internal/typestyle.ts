@@ -11,14 +11,14 @@ export type StylesTarget = { textContent: string | null };
 /**
  * Creates an instance of free style with our options
  */
-const createFreeStyle = () => FreeStyle.create(
+const createFreeStyle = (debug: boolean) => FreeStyle.create(
   /** Use the default hash function */
   undefined,
   /** Preserve $debugName values if NODE_ENV is not available (browser) */
-  typeof process !== 'undefined'
-    ? process.env.NODE_ENV !== 'production'
-    : true
+  debug,
 );
+
+const isProcProduction = () => typeof process !== 'undefined' ? process.env.NODE_ENV === 'production' : false;
 
 export type EventSetItem = { callback: (...data: any[]) => void, context?: Object | null, once?: boolean };
 export type Events = 'updated' | 'changeTarget' | 'render';
@@ -33,23 +33,26 @@ export class TypeStyle {
   protected _pendingRawChange: boolean;
   protected _raw: string;
   protected _tag?: StylesTarget;
+  protected _debugNames: boolean;
 
   /**
    * We have a single stylesheet that we update as components register themselves
    */
   protected _lastFreeStyleChangeId: number;
 
-  constructor({ autoGenerateTag }: { autoGenerateTag: boolean }) {
-    const freeStyle = createFreeStyle();
-
+  constructor(config?: { autoGenerateTag?: boolean, debugNames?: boolean }) {
     this._eventListeners = {};
-    this._autoGenerateTag = autoGenerateTag;
-    this._freeStyle = freeStyle;
-    this._lastFreeStyleChangeId = freeStyle.changeId;
+    this._autoGenerateTag = config ? !!config.autoGenerateTag : true;
+    this._debugNames = config && typeof config.debugNames !== 'undefined' ? config.debugNames : !isProcProduction();
     this._pending = 0;
     this._pendingRawChange = false;
     this._raw = '';
     this._tag = undefined;
+
+    const freeStyle = createFreeStyle(this._debugNames);
+
+    this._freeStyle = freeStyle;
+    this._lastFreeStyleChangeId = freeStyle.changeId;
 
     // rebind prototype to TypeStyle.  It might be better to do a function() { return this.style.apply(this, arguments)}
     this.style = this.style.bind(this);
@@ -194,12 +197,14 @@ export class TypeStyle {
   /**
    * Helps with testing. Reinitializes FreeStyle + raw
    */
-  public reinit = (): void => {
+  public reinit = (debugNames?: boolean): void => {
     /** reinit freestyle */
 
     this.offAll();
 
-    const freeStyle = createFreeStyle();
+    this._debugNames = typeof debugNames !== 'undefined' ? debugNames : !isProcProduction();
+
+    const freeStyle = createFreeStyle(this._debugNames);
     this._freeStyle = freeStyle;
     this._lastFreeStyleChangeId = freeStyle.changeId;
 

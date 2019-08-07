@@ -21,8 +21,8 @@ export { extend, classes, media } from './internal/utilities';
  *
  * NOTE: styles aren't shared between different instances.
  */
-export function createTypeStyle(target?: { textContent: string | null }, autoGenerateTag: boolean = false): TypeStyle {
-    const instance = new TypeStyle({ autoGenerateTag });
+export function createTypeStyle(target?: { textContent: string | null }, autoGenerateTag: boolean = false, debugNames?: boolean): TypeStyle {
+    const instance = new TypeStyle({ autoGenerateTag, debugNames });
     if (target) {
         instance.setStylesTarget(target);
     }
