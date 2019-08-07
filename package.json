@@ -19,7 +19,7 @@
     "build-prod": "webpack --production",
     "compile": "tsc -p tsconfig.es2015.json",
     "test": "npm run compile && mocha ./test/tests/**/*.js",
-    "preversion": "npm run test && npm run build-test",
+    "preversion": "npm run test && npm run build-prod",
     "postversion": "git push --follow-tags && npm publish"
   },
   "keywords": [],
