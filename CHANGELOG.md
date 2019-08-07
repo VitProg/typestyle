@@ -1,3 +1,9 @@
+# 2.2.3
+* method for join transform property into a string if it is an array - now recursive for nests styles
+
+# 2.2.2
+* debugNames property to TypeScript constructor and reinit method
+
 # 2.2.0
 * new build script (webpack)
 * join transform property into a string if it is an array. For example: ```{transform: ['scale(2)', 'rotate(25deg)']}``` convert to ```{transform: 'scale(2)rotate(25deg)'}``` 

@@ -236,11 +236,17 @@ export class TypeStyle {
     const result = {};
 
     for (const name of Object.keys(styles)) {
-      let value = (styles as any)[name];
+      let value: string | string[] | S = (styles as any)[name];
+
+      if (value !== null && typeof value === 'object' && !Array.isArray(value) && 'hasOwnProperty' in value) {
+        value = this.optimize(value);
+      }
+
       switch (name) {
         case 'transform': {
-          if (Array.isArray(value)) {
+          if (Array.isArray(value) && value) {
             value = value.join('');
+            value = value.replace(/,\s+/g, ',');
           }
           break;
         }

@@ -1,4 +1,4 @@
-import { style, stylesheet, getStyles, reinit, classes, cssRule, createTypeStyle } from '../index';
+import {style, stylesheet, getStyles, reinit, classes, cssRule, createTypeStyle} from '../index';
 import * as assert from 'assert';
 
 describe("initial test", () => {
@@ -168,6 +168,32 @@ describe("initial test", () => {
     assert.equal(getStyles(), '.fb25ljk{background-color:red;color:blue}');
   });
 
+  it('should array in transform css property with nest', () => {
+    reinit();
+    style(
+      {
+        transform: ['translateX(1px)', 'translateY(2px)'],
+      },
+      {
+        $nest: {
+          '&::after': {
+            transform: ['scale(1.1)', 'skew(10deg, 10deg)'],
+          },
+          '& .b': {
+            transform: ['scale(2)', 'rotateY(90deg)'],
+            $nest: {
+              '&::after': {
+                transform: ['scale(1.1)', 'skew(10deg, 10deg)'],
+              },
+            },
+          },
+        },
+      },
+    );
+
+    assert.equal(getStyles(), '.f1842oiw{transform:translateX(1px)translateY(2px)}.f1842oiw::after,.f1842oiw .b::after{transform:scale(1.1)skew(10deg,10deg)}.f1842oiw .b{transform:scale(2)rotateY(90deg)}');
+  });
+
   it("style should not append px to numeric properties", () => {
     reinit();
     style({
@@ -224,6 +250,5 @@ describe("initial test", () => {
 
     ts1.reinit();
     assert.equal(ts1.style(css), 'test_fc4zu15');
-
   });
 });
