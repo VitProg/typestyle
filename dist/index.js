@@ -592,9 +592,10 @@
             var free_style__WEBPACK_IMPORTED_MODULE_0___default = __webpack_require__.n(free_style__WEBPACK_IMPORTED_MODULE_0__);
             var _formatting__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
             var _utilities__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(0);
-            const createFreeStyle = () => free_style__WEBPACK_IMPORTED_MODULE_0__["create"](undefined, typeof process !== "undefined" ? "production" !== "production" : true);
+            const createFreeStyle = debug => free_style__WEBPACK_IMPORTED_MODULE_0__["create"](undefined, debug);
+            const isProcProduction = () => typeof process !== "undefined" ? "production" === "production" : false;
             class TypeStyle {
-                constructor({autoGenerateTag: autoGenerateTag}) {
+                constructor(config) {
                     this.cssRaw = mustBeValidCSS => {
                         if (!mustBeValidCSS) {
                             return;
@@ -641,9 +642,10 @@
                         this._styleUpdated();
                         return animationName;
                     };
-                    this.reinit = () => {
+                    this.reinit = debugNames => {
                         this.offAll();
-                        const freeStyle = createFreeStyle();
+                        this._debugNames = typeof debugNames !== "undefined" ? debugNames : !isProcProduction();
+                        const freeStyle = createFreeStyle(this._debugNames);
                         this._freeStyle = freeStyle;
                         this._lastFreeStyleChangeId = freeStyle.changeId;
                         this._raw = "";
@@ -674,15 +676,16 @@
                         return result;
                     };
                     this._eventListeners = {};
-                    const freeStyle = createFreeStyle();
                     this._eventListeners = {};
-                    this._autoGenerateTag = autoGenerateTag;
-                    this._freeStyle = freeStyle;
-                    this._lastFreeStyleChangeId = freeStyle.changeId;
+                    this._autoGenerateTag = config ? !!config.autoGenerateTag : true;
+                    this._debugNames = config && typeof config.debugNames !== "undefined" ? config.debugNames : !isProcProduction();
                     this._pending = 0;
                     this._pendingRawChange = false;
                     this._raw = "";
                     this._tag = undefined;
+                    const freeStyle = createFreeStyle(this._debugNames);
+                    this._freeStyle = freeStyle;
+                    this._lastFreeStyleChangeId = freeStyle.changeId;
                     this.style = this.style.bind(this);
                     this.on = this.on.bind(this);
                     this.once = this.once.bind(this);
@@ -1022,9 +1025,10 @@
         var typestyle = __webpack_require__(3);
         var types = __webpack_require__(5);
         var utilities = __webpack_require__(0);
-        function createTypeStyle(target, autoGenerateTag = false) {
+        function createTypeStyle(target, autoGenerateTag = false, debugNames) {
             const instance = new typestyle["a"]({
-                autoGenerateTag: autoGenerateTag
+                autoGenerateTag: autoGenerateTag,
+                debugNames: debugNames
             });
             if (target) {
                 instance.setStylesTarget(target);

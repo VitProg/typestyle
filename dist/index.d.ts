@@ -8,7 +8,7 @@ export declare const forceRenderStyles: () => void;
 export declare const fontFace: (...fontFace: types.FontFace[]) => void;
 export declare const getStyles: () => string;
 export declare const keyframes: (frames: types.KeyFrames) => string;
-export declare const reinit: () => void;
+export declare const reinit: (debugNames?: boolean | undefined) => void;
 export declare const style: {
     (...objects: (types.NestedCSSProperties | undefined)[]): string;
     (...objects: (false | types.NestedCSSProperties | null | undefined)[]): string;

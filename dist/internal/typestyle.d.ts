@@ -18,9 +18,11 @@ export declare class TypeStyle {
     protected _pendingRawChange: boolean;
     protected _raw: string;
     protected _tag?: StylesTarget;
+    protected _debugNames: boolean;
     protected _lastFreeStyleChangeId: number;
-    constructor({ autoGenerateTag }: {
-        autoGenerateTag: boolean;
+    constructor(config?: {
+        autoGenerateTag?: boolean;
+        debugNames?: boolean;
     });
     readonly freeStyle: FreeStyle.FreeStyle;
     protected _afterAllSync(cb: () => void): void;
@@ -32,7 +34,7 @@ export declare class TypeStyle {
     fontFace: (...fontFace: types.FontFace[]) => void;
     getStyles: () => string;
     keyframes: (frames: types.KeyFrames) => string;
-    reinit: () => void;
+    reinit: (debugNames?: boolean | undefined) => void;
     setStylesTarget: (tag: StylesTarget) => void;
     optimize<S extends Styles | CSSProperties>(styles: S): S;
     style(...objects: (types.NestedCSSProperties | undefined)[]): string;
