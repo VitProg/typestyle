@@ -1,6 +1,6 @@
 {
   "name": "typestyle-vp",
-  "version": "3.0.0",
+  "version": "2.2.0",
   "description": "TypeSafe CSS",
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
     "compile": "tsc -p tsconfig.es2015.json",
     "test": "npm run compile && mocha ./test/tests/**/*.js",
     "preversion": "npm run test && npm run build-prod",
-    "postversion": "git add dist/ && git push --follow-tags && npm publish"
+    "postversion": "git add dist/ && git commit -m '- publish new version' && git push --follow-tags && npm publish"
   },
   "keywords": [],
   "author": "VitProg",
